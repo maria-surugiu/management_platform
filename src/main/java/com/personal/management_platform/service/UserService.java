@@ -2,6 +2,7 @@ package com.personal.management_platform.service;
 
 import com.personal.management_platform.model.User;
 import com.personal.management_platform.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,9 +10,11 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // register new user
@@ -20,7 +23,9 @@ public class UserService {
             throw new RuntimeException("Email-ul already used!");
         }
 
-        // TODO: encrypt password
+        // encrypt password
+        String encodedPassword = passwordEncoder.encode(user.getPasswordHash());
+        user.setPasswordHash(encodedPassword);
 
         return userRepository.save(user);
     }
