@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Component;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,15 +18,20 @@ public class User {
     private UUID id;
 
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @NotBlank(message = "Password is required")
     private String passwordHash;
 
     @Column(name = "first_name", nullable = false, length = 100)
+    @NotBlank(message = "First name is required")
     private String firstName;
 
     @Column(name = "last_name", nullable = false, length = 100)
+    @NotBlank(message = "Last name is required")
     private String lastName;
 
     @Column(nullable = false, length = 50)
