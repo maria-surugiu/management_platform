@@ -3,8 +3,7 @@ package com.personal.management_platform.controller;
 import com.personal.management_platform.model.User;
 import com.personal.management_platform.service.UserService;
 import com.personal.management_platform.config.JwtUtil;
-import com.personal.management_platform.dto.LoginRequest;
-import com.personal.management_platform.dto.AuthResponse;
+import com.personal.management_platform.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +30,8 @@ public class UserController {
     // Endpoint for registering new user
     // POST requests at http://localhost:8080/api/users/register
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@Valid @RequestBody User user) {
-        User createdUser = userService.registerUser(user);
-
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        UserResponse createdUser = userService.registerUser(registerRequest);
 
         // return new created object and the HTTP status -> 201 Created
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -62,10 +60,8 @@ public class UserController {
     // Endpoint for admin: list all users
     // GET requests at http://localhost:8080/api/users
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-
-        // return list and -> 200 status
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 }
