@@ -3,7 +3,6 @@ package com.personal.management_platform.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.stereotype.Component;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;

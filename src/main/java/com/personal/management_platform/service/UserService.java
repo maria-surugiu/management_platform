@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -25,8 +26,8 @@ public class UserService {
             throw new EmailAlreadyExistsException("Email already exists!");
         }
 
-//        String cleanPassword = user.getPasswordHash().trim();
-//        user.setPasswordHash(cleanPassword);
+        //String cleanPassword = user.getPasswordHash().trim();
+        //user.setPasswordHash(cleanPassword);
 
         String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$";
 
@@ -40,6 +41,10 @@ public class UserService {
         user.setPasswordHash(encodedPassword);
 
         return userRepository.save(user);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     // admin method: list all users
