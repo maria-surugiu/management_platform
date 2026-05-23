@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -21,24 +22,33 @@ public class JwtUtil {
     private long jwtExpiration;
 
     // generate new token based on email
-    public String generateToken(String email) {
+    public String generateToken(UUID userId, String role) {
+        java.util.Map<String, Object> extraClaims = new java.util.HashMap<>();
+        extraClaims.put("role", role);
+
         return Jwts.builder()
-                .subject(email)
+                .claims(extraClaims)
+                .subject(userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    // get email from token
-    public String extractEmail(String token) {
+    // get userId from token
+    public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    // get role from token
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
     // check if token is valid
-    public boolean isTokenValid(String token, String userEmail) {
-        final String extractedEmail = extractEmail(token);
-        return (extractedEmail.equals(userEmail)) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, String userId) {
+        final String extractedUserId = extractUserId(token);
+        return (extractedUserId.equals(userId)) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

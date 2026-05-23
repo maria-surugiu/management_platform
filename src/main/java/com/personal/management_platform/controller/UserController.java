@@ -52,7 +52,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong mail or password!");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getId(), user.getRole());
 
         return ResponseEntity.ok(new AuthResponse(token));
     }
