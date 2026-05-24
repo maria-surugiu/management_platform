@@ -2,13 +2,18 @@ package com.personal.management_platform.service;
 
 import com.personal.management_platform.dto.CreateProjectRequest;
 import com.personal.management_platform.dto.ProjectResponse;
+import com.personal.management_platform.dto.UpdateProjectRequest;
+import com.personal.management_platform.exception.ProjectNotFoundException;
+import com.personal.management_platform.exception.UnauthorizedAccessException;
 import com.personal.management_platform.exception.UserNotFoundException;
 import com.personal.management_platform.model.Project;
 import com.personal.management_platform.model.User;
 import com.personal.management_platform.repository.ProjectRepository;
 import com.personal.management_platform.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -47,5 +52,48 @@ public class ProjectService {
                 project.getCreatedAt(),
                 project.getUpdatedAt()
         );
+    }
+
+    @Transactional
+    public ProjectResponse updateProject(UUID projectId, UpdateProjectRequest request, UUID requesterId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+
+        if (!project.getOwner().getId().equals(requesterId)) {
+            throw new UnauthorizedAccessException("You are not authorized to update this project");
+        }
+
+        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            project.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            project.setDescription(request.getDescription());
+        }
+        if (request.getStatus() != null) {
+            project.setStatus(request.getStatus());
+        }
+
+        Project updatedProject = projectRepository.save(project);
+        return mapToProjectResponse(updatedProject);
+    }
+
+    public void deleteProject(UUID projectId, UUID requesterId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+
+        if (!project.getOwner().getId().equals(requesterId)) {
+            throw new UnauthorizedAccessException("You are not authorized to delete this project");
+        }
+
+        project.setActive(false);
+        projectRepository.save(project);
+    }
+
+    public List<ProjectResponse> getAllActiveProjects() {
+        List<Project> projects = projectRepository.findByIsActiveTrue();
+
+        return projects.stream()
+                .map(this::mapToProjectResponse)
+                .toList();
     }
 }

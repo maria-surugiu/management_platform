@@ -2,6 +2,7 @@ package com.personal.management_platform.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -35,6 +36,7 @@ public class SecurityConfig {
 
                         // only admins
                         .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/projects").hasRole("ADMIN")
 
                         // any other requests require auth
                         .anyRequest().authenticated()
