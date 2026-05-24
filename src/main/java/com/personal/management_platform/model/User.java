@@ -79,7 +79,7 @@ public class User {
         return updatedAt;
     }
 
-    public Boolean getActive() {
+    public Boolean getIsActive() {
         return isActive;
     }
 
@@ -107,7 +107,7 @@ public class User {
         this.lastName = lastName;
     }
 
-    public void setActive(Boolean active) {
+    public void setIsActive(Boolean active) {
         isActive = active;
     }
 

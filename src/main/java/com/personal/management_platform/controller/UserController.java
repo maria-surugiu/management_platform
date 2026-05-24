@@ -68,4 +68,27 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
+
+    // Endpoint for admin: change user role
+    // PUT requests at http://localhost:8080/api/users/{id}/role
+    @PutMapping("/{id}/role")
+    public ResponseEntity<UserResponse> changeUserRole(
+            @PathVariable UUID id,
+            @Valid @RequestBody ChangeRoleRequest request) {
+
+        return ResponseEntity.ok(userService.changeUserRole(id, request));
+    }
+
+    // Endpoint for admin: deactivate user account
+    // PUT requests at http://localhost:8080/api/users/{id}/deactivate
+    @PutMapping("/{id}/deactivate")
+    public ResponseEntity<UserResponse> deactivateUser(@PathVariable UUID id) {
+
+        return ResponseEntity.ok(userService.deactivateUser(id));
+    }
+
+    @PutMapping("/{id}/reactivate")
+    public ResponseEntity<UserResponse> reactivateUser(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.reactivateUser(id));
+    }
 }

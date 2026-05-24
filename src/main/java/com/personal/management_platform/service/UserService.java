@@ -1,15 +1,9 @@
 package com.personal.management_platform.service;
 
-import com.personal.management_platform.dto.ChangePasswordRequest;
-import com.personal.management_platform.dto.UpdateProfileRequest;
+import com.personal.management_platform.dto.*;
+import com.personal.management_platform.exception.*;
 import com.personal.management_platform.model.User;
 import com.personal.management_platform.repository.UserRepository;
-import com.personal.management_platform.exception.EmailAlreadyExistsException;
-import com.personal.management_platform.exception.WeakPasswordException;
-import com.personal.management_platform.exception.UserNotFoundException;
-import com.personal.management_platform.exception.InvalidPasswordException;
-import com.personal.management_platform.dto.RegisterRequest;
-import com.personal.management_platform.dto.UserResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +28,7 @@ public class UserService {
                 user.getLastName(),
                 user.getEmail(),
                 user.getRole(),
+                user.getIsActive(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
@@ -68,6 +63,10 @@ public class UserService {
     public User authenticateUser(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Wrong email or password!"));
+
+        if (!user.getIsActive()) {
+            throw new AccountDeactivatedException("Your account has been deactivated. Please contact support.");
+        }
 
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new InvalidPasswordException("Wrong email or password!");
@@ -124,6 +123,36 @@ public class UserService {
                 .stream()
                 .map(this::mapToUserResponse)
                 .toList();
+    }
+
+    public UserResponse changeUserRole(UUID targetUserId, ChangeRoleRequest request) {
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        user.setRole(request.getRole());
+        User updatedUser = userRepository.save(user);
+
+        return mapToUserResponse(updatedUser);
+    }
+
+    public UserResponse deactivateUser(UUID targetUserId) {
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        user.setIsActive(false);
+        User updatedUser = userRepository.save(user);
+
+        return mapToUserResponse(updatedUser);
+    }
+
+    public UserResponse reactivateUser(UUID targetUserId) {
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        user.setIsActive(true);
+        User updatedUser = userRepository.save(user);
+
+        return mapToUserResponse(updatedUser);
     }
 
     public Optional<User> findByEmail(String email) {
