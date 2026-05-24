@@ -72,4 +72,18 @@ public class ProjectController {
 
         return ResponseEntity.ok(projects);
     }
+
+    @PostMapping("/{id}/members")
+    public ResponseEntity<ProjectResponse> addMember(
+            @PathVariable UUID id,
+            @Valid @RequestBody com.personal.management_platform.dto.AddMemberRequest request,
+            Authentication authentication) {
+
+        String userIdStr = (String) authentication.getPrincipal();
+        UUID requesterId = UUID.fromString(userIdStr);
+
+        ProjectResponse updatedProject = projectService.addMemberToProject(id, request, requesterId);
+
+        return ResponseEntity.ok(updatedProject);
+    }
 }

@@ -1,5 +1,6 @@
 package com.personal.management_platform.service;
 
+import com.personal.management_platform.dto.AddMemberRequest;
 import com.personal.management_platform.dto.CreateProjectRequest;
 import com.personal.management_platform.dto.ProjectResponse;
 import com.personal.management_platform.dto.UpdateProjectRequest;
@@ -95,5 +96,31 @@ public class ProjectService {
         return projects.stream()
                 .map(this::mapToProjectResponse)
                 .toList();
+    }
+
+    @Transactional
+    public ProjectResponse addMemberToProject(UUID projectId, com.personal.management_platform.dto.AddMemberRequest request, UUID requesterId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+
+        if (!project.getOwner().getId().equals(requesterId)) {
+            throw new UnauthorizedAccessException("Only the project owner can add members");
+        }
+
+        if (request.getUserId().equals(requesterId)) {
+            throw new IllegalArgumentException("You are the owner of this project, you cannot be added as a member.");
+        }
+
+        User newMember = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User to add not found in database"));
+
+        if (project.getMembers().contains(newMember)) {
+            throw new IllegalArgumentException("This user is already a member of the project.");
+        }
+
+        project.getMembers().add(newMember);
+
+        Project updatedProject = projectRepository.save(project);
+        return mapToProjectResponse(updatedProject);
     }
 }
