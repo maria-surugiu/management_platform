@@ -1,7 +1,10 @@
 package com.personal.management_platform.exception;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.time.LocalDateTime;
 
+@JsonPropertyOrder({"timestamp", "status", "error", "message"})
 public class ErrorResponse {
     private LocalDateTime timestamp;
     private int status;
@@ -15,7 +18,6 @@ public class ErrorResponse {
         this.message = message;
     }
 
-    // only getters, no need to setters
     public LocalDateTime getTimestamp() { return timestamp; }
     public int getStatus() { return status; }
     public String getError() { return error; }

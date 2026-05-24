@@ -8,60 +8,64 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder,
-                          JwtUtil jwtUtil) {
+    public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
     }
 
-    // Endpoint for registering new user
-    // POST requests at http://localhost:8080/api/users/register
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        UserResponse createdUser = userService.registerUser(registerRequest);
-
-        // return new created object and the HTTP status -> 201 Created
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.registerUser(registerRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-
-        Optional<User> userOptional = userService.findByEmail(loginRequest.getEmail());
-
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong mail or password!");
-        }
-
-        User user = userOptional.get();
-
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong mail or password!");
-        }
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
+        User user = userService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
 
         String token = jwtUtil.generateToken(user.getId(), user.getRole());
-
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
-    // Endpoint for admin: list all users
-    // GET requests at http://localhost:8080/api/users
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return ResponseEntity.ok(userService.getUserById(userId));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateProfile(
+            Authentication authentication,
+            @Valid @RequestBody UpdateProfileRequest updateRequest) {
+
+        UUID userId = UUID.fromString(authentication.getName());
+        return ResponseEntity.ok(userService.updateProfile(userId, updateRequest));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<String> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request) {
+
+        UUID userId = UUID.fromString(authentication.getName());
+        userService.changePassword(userId, request);
+
+        return ResponseEntity.ok("Password saved successfully!");
+    }
+
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }
