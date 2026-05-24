@@ -32,7 +32,7 @@ public class SecurityConfig {
                         // anyone can access this is endpoint to test it on Postman for now
                         .requestMatchers("/api/users/register", "/api/users/login", "/error").permitAll()
 
-                        .requestMatchers("/api/users/me", "/api/users/me/password").authenticated()
+                        .requestMatchers("/api/users/me", "/api/users/me/password", "/api/users/me/projects").authenticated()
 
                         // only admins
                         .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")

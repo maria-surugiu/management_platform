@@ -123,4 +123,13 @@ public class ProjectService {
         Project updatedProject = projectRepository.save(project);
         return mapToProjectResponse(updatedProject);
     }
+
+    public List<ProjectResponse> getMyProjects(UUID userId) {
+        // Apelăm query-ul custom din Repository care aduce proiectele unde sunt Owner SAU Membru
+        List<Project> projects = projectRepository.findActiveProjectsForUser(userId);
+
+        return projects.stream()
+                .map(this::mapToProjectResponse)
+                .toList();
+    }
 }

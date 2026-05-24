@@ -1,6 +1,7 @@
 package com.personal.management_platform.controller;
 
 import com.personal.management_platform.model.User;
+import com.personal.management_platform.service.ProjectService;
 import com.personal.management_platform.service.UserService;
 import com.personal.management_platform.config.JwtUtil;
 import com.personal.management_platform.dto.*;
@@ -19,9 +20,11 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final ProjectService projectService;
 
-    public UserController(UserService userService, JwtUtil jwtUtil) {
+    public UserController(UserService userService, JwtUtil jwtUtil, ProjectService projectService) {
         this.userService = userService;
+        this.projectService = projectService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -62,6 +65,16 @@ public class UserController {
         userService.changePassword(userId, request);
 
         return ResponseEntity.ok("Password saved successfully!");
+    }
+
+    @GetMapping("/me/projects")
+    public ResponseEntity<List<ProjectResponse>> getMyProjects(Authentication authentication) {
+        String userIdStr = (String) authentication.getPrincipal();
+        UUID userId = UUID.fromString(userIdStr);
+
+        List<ProjectResponse> myProjects = projectService.getMyProjects(userId);
+
+        return ResponseEntity.ok(myProjects);
     }
 
     @GetMapping
