@@ -11,7 +11,7 @@ import com.personal.management_platform.model.Project;
 import com.personal.management_platform.model.User;
 import com.personal.management_platform.repository.ProjectRepository;
 import com.personal.management_platform.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +28,7 @@ public class ProjectService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public ProjectResponse createProject(CreateProjectRequest request, UUID ownerId) {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new UserNotFoundException("Owner not found in database"));
@@ -78,6 +79,7 @@ public class ProjectService {
         return mapToProjectResponse(updatedProject);
     }
 
+    @Transactional
     public void deleteProject(UUID projectId, UUID requesterId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
@@ -125,7 +127,6 @@ public class ProjectService {
     }
 
     public List<ProjectResponse> getMyProjects(UUID userId) {
-        // Apelăm query-ul custom din Repository care aduce proiectele unde sunt Owner SAU Membru
         List<Project> projects = projectRepository.findActiveProjectsForUser(userId);
 
         return projects.stream()

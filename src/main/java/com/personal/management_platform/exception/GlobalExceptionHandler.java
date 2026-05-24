@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({UserNotFoundException.class, ProjectNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, ProjectNotFoundException.class, TaskNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleNotFound(Exception ex) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
@@ -39,10 +39,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
         String errorMessage = "Malformed JSON request or invalid field value.";
 
-        if (ex.getMessage() != null && ex.getMessage().contains("not one of the values accepted for Enum class")) {
-            String badValue = ex.getMessage().substring(ex.getMessage().indexOf("from String") + 12, ex.getMessage().indexOf("\": not one"));
-
-            errorMessage = String.format("Invalid status value '%s'. Allowed values are: [ACTIVE, IN_PROGRESS, ON_HOLD, COMPLETED, ARCHIVED]", badValue);
+        Throwable cause = ex.getCause();
+        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException formatEx) {
+            if (formatEx.getTargetType().isEnum()) {
+                String allowedValues = java.util.Arrays.toString(formatEx.getTargetType().getEnumConstants());
+                errorMessage = "Invalid value. Allowed values are: " + allowedValues;
+            }
         }
 
         return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);

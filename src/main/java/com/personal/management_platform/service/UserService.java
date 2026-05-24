@@ -6,6 +6,7 @@ import com.personal.management_platform.model.User;
 import com.personal.management_platform.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public class UserService {
         );
     }
 
+    @Transactional
     public UserResponse registerUser(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Email already exists!");
@@ -82,6 +84,7 @@ public class UserService {
         return mapToUserResponse(user);
     }
 
+    @Transactional
     public UserResponse updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -95,6 +98,7 @@ public class UserService {
         return mapToUserResponse(updatedUser);
     }
 
+    @Transactional
     public void changePassword(UUID userId, ChangePasswordRequest request) {
         if (request.getCurrentPassword().equals(request.getNewPassword())) {
             throw new InvalidPasswordException("New password cannot be identical to the current password!");
@@ -125,6 +129,7 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public UserResponse changeUserRole(UUID targetUserId, ChangeRoleRequest request) {
         User user = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -135,6 +140,7 @@ public class UserService {
         return mapToUserResponse(updatedUser);
     }
 
+    @Transactional
     public UserResponse deactivateUser(UUID targetUserId) {
         User user = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
@@ -145,6 +151,7 @@ public class UserService {
         return mapToUserResponse(updatedUser);
     }
 
+    @Transactional
     public UserResponse reactivateUser(UUID targetUserId) {
         User user = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
