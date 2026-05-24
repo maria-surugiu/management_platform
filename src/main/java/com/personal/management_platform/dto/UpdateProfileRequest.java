@@ -20,7 +20,6 @@ public class UpdateProfileRequest {
         this.lastName = lastName;
     }
 
-    // Getters și Setters
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
 
