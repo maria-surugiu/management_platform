@@ -380,6 +380,14 @@ tail -f app.log
 
 ---
 
+## Logs
+
+You can  access the logs directly from the project directory:
+
+```text
+management_platform/logs/app.log
+```
+
 ## Download Logs from Docker Desktop
 
 1. Open Docker Desktop
